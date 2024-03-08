@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">SR:CSM</string>
+    <string name="action_source_code">Source code</string>
 </resources>

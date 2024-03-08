@@ -1,0 +1,48 @@
+name: Build Signed APK
+
+on:
+  create:
+    tags:
+      - "*"
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set Up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'adopt'
+          java-version: 17
+
+      - name: Assemble Release
+        run: ./gradlew clean assembleRelease
+
+      - name: Sign Release
+        uses: r0adkll/sign-android-release@v1
+        id: sign_release
+        with:
+          releaseDirectory: app/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          alias: ${{ secrets.ALIAS }}
+          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: "34.0.0"
+
+      - name: Rename APK
+        run: mv ${{steps.sign_release.outputs.signedReleaseFile}} app/build/outputs/apk/release/${{ github.event.repository.name }}.apk
+
+      - name: Create Release on GitHub
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: 'app/build/outputs/apk/release/${{ github.event.repository.name }}.apk'
+          artifactErrorsFailBuild: true
+          tag: '${{ github.ref_name}}'
+          commit: main
+          body: 'Provides a signed APK for reproducible builds.'

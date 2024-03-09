@@ -23,7 +23,7 @@ Any contributions will be greatly appreciated.
 
 ## Preview
 
-TODO
+<img src="./resources/demo_0.png" alt="Demo" height="300">
 
 ## Download
 
